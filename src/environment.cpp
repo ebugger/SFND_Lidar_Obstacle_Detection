@@ -46,7 +46,13 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     std::vector<Car> cars = initHighway(renderScene, viewer);
     
     // Complete:: Create lidar sensor 
+    // The lidar arguments are necessary for modeling ray collisions. The Lidar object is going to be holding 
+    //point cloud data which could be very large. By instatinating on the heap, we have more memory to work with
+    // than the 2MB on the stack. However, it takes longer to look up objects on the heap, while stack lookup 
+    // is very fast.
     Lidar * lidarSensor = new Lidar(cars, .0);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr clouds = lidarSensor->scan();
+    renderRays(viewer, lidarSensor->position, clouds);
     // TODO:: Create point processor
   
 }
