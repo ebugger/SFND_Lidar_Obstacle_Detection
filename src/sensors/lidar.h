@@ -6,6 +6,7 @@
 
 const double pi = 3.1415;
 
+//Lidar will use these rays to sense its surrounding by doing ray casting.
 struct Ray
 {
 	
@@ -75,6 +76,7 @@ struct Lidar
 	std::vector<Ray> rays;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 	std::vector<Car> cars;
+	//where the lidar located
 	Vect3 position;
 	double groundSlope;
 	double minDistance;
@@ -83,6 +85,7 @@ struct Lidar
 	double sderr;
 
 	Lidar(std::vector<Car> setCars, double setGroundSlope)
+		//cloud point of type pcl::PointXYZ
 		: cloud(new pcl::PointCloud<pcl::PointXYZ>()), position(0,0,2.6)
 	{
 		// TODO:: set minDistance to 5 to remove points from roof of ego car
@@ -119,6 +122,7 @@ struct Lidar
 		// pcl uses boost smart pointers for cloud pointer so we don't have to worry about manually freeing the memory
 	}
 
+	//ray casting.
 	pcl::PointCloud<pcl::PointXYZ>::Ptr scan()
 	{
 		cloud->points.clear();
