@@ -45,8 +45,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     bool renderScene = true;
     std::vector<Car> cars = initHighway(renderScene, viewer);
     
-    // TODO:: Create lidar sensor 
-
+    // Complete:: Create lidar sensor 
+    Lidar * lidarSensor = new Lidar(cars, .0);
     // TODO:: Create point processor
   
 }
@@ -79,9 +79,14 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
 int main (int argc, char** argv)
 {
     std::cout << "starting enviroment" << std::endl;
-
+    //The viewer is used to handle all your visualization of objects on the screen
+    //viewer is usually passed in as a reference. That way the process is more streamlined because 
+    //something doesn't need to get returned.
     pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     CameraAngle setAngle = XY;
+    //set up different viewing angles in your window, 
+    //XY, TopDown, Side, and FPS. XY gives a 45 degree angle view, while FPS is First Person Sense and gives 
+    //the sensation of being in the car’s driver seat.
     initCamera(setAngle, viewer);
     simpleHighway(viewer);
 
