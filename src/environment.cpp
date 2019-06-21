@@ -60,7 +60,12 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     renderPointCloud(viewer, clouds, "test", Color(1,1,1));
 
     // TODO:: Create point processor on the stack
-    ProcessPointClouds<pcl::PointXYZ>  porce_PC;
+    ProcessPointClouds<pcl::PointXYZ>  processor_PC;
+    std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> my_seg_cloud = processor_PC.SegmentPlane(clouds, 100, 0.2);
+    //Color(R,G,B)
+    renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
+    renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
+
 }
 
 //Another way to Create point processor on the heap(main memory)
