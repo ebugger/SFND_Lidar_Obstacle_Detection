@@ -42,6 +42,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     // ----------------------------------------------------
     
     // RENDER OPTIONS
+    //view the point cloud without obstacles when set to false
     bool renderScene = true;
     std::vector<Car> cars = initHighway(renderScene, viewer);
     
@@ -51,8 +52,14 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     // than the 2MB on the stack. However, it takes longer to look up objects on the heap, while stack lookup 
     // is very fast.
     Lidar * lidarSensor = new Lidar(cars, .0);
+    //The Ptr type from PointCloud indicates that the object is actually a pointer - a 32 bit integer that 
+    //contains the memory address of your point cloud object
     pcl::PointCloud<pcl::PointXYZ>::Ptr clouds = lidarSensor->scan();
-    renderRays(viewer, lidarSensor->position, clouds);
+    //render points and shapes to the pcl viewer.render your lidar rays as line segments in the viewer.
+    //renderRays(viewer, lidarSensor->position, clouds);
+    bool renderScene = false;
+    renderPointCloud(viewer, clouds, ""test"", Color color = Color(1,1,1));
+
     // TODO:: Create point processor
   
 }
