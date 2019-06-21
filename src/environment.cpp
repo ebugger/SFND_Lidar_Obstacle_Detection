@@ -57,8 +57,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     pcl::PointCloud<pcl::PointXYZ>::Ptr clouds = lidarSensor->scan();
     //render points and shapes to the pcl viewer.render your lidar rays as line segments in the viewer.
     //renderRays(viewer, lidarSensor->position, clouds);
-    bool renderScene = false;
-    renderPointCloud(viewer, clouds, ""test"", Color color = Color(1,1,1));
+    renderScene = false;
+    renderPointCloud(viewer, clouds, "test", Color(1,1,1));
 
     // TODO:: Create point processor
   
