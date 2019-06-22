@@ -68,7 +68,7 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 	while(maxIterations--){
 		//hash set with no order, with unique element
 		std::unordered_set<int> inliers;
-		if(inliers.size() < 2) {
+		while(inliers.size() < 2) {
 			//rand() will generate very large number and we got a MOD operator, so the result will be in 0 and the points size.
 			inliers.insert(rand() % (cloud->points.size()));
 		}
@@ -98,7 +98,7 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 			//fabs and sqrt
 			float dist = fabs(A * x0 + B * y0 + C ) / sqrt(A*A + B*B);
 
-			if(dist < distanceTol)
+			if(dist <= distanceTol)
 				inliers.insert(i);
 
 		}
@@ -106,31 +106,6 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 			inliersResult = inliers;
 
 	}
-/* 	
-	// TODO: Fill in this function
-	pcl::
-	// For max iterations 
-	for (int i=0,i<maxIterations,i++) {
-	// Randomly sample subset and fit line
-
-		float A = cloud->point[index1].y - cloud->point[index2].y;
-		float B = cloud->point[index2].x - cloud->point[index1].x;
-		float C = cloud->point[index1].x * cloud->point[index2].y - cloud->point[index1].y * cloud->point[index2].x;
-	// Measure distance between every point and fitted line
-		float distance_p_to_l;
-		for (pcl::PointXYZ point: cloud->points) {
-			distance_p_to_l = std::abs(A * point.x + B * point.y + C);
-			// If distance is smaller than threshold count it as inlier
-			if (distance_p_to_l < distanceTol) {
-
-			}
-
-		}
-	
-
-	// Return indicies of inliers from fitted line with most inliers
-	}
-	*/	
 	return inliersResult;
 
 }
