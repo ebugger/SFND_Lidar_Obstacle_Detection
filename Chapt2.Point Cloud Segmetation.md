@@ -10,6 +10,8 @@ Other methods of RANSAC could sample some percentage of the model points, for ex
 
 ## Distance from dot to Line
 
+![not text](img/Screenshot_20190623-181604_YouTube.jpg)
+
 ![not text](img/Distance_p_to_l.PNG)
 
 ![not text](img/prof.PNG)
