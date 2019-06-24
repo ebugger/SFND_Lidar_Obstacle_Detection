@@ -144,11 +144,14 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 		float B = (x2 - x1);
 		float C = (x1 * y2 - x2 * y1);
 		*/
-		float i = (y2 - y1) * (z3 - z1) * (z2 - z1) * (y3 - y1);
-		//float i = (y2−y1) * (z3−z1) − (z2−z1) * (y3−y1);
-		float j = (z2-z1) * (x3-x1) - (x2-x1) * (z3-z1);
-		float k = (x2-x1) * (y3-y1) - (y2-y1) * (x3-x1);
+		float i = (y2 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
+		float j = (z2 - z1) * (x2 - x1) - (x2 - x1) * (x3 - z1);
+		float k = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
 		float d = -(i * x1 + j * y1 + k * z1);
+		//float i = (y2−y1) * (z3−z1) − (z2−z1) * (y3−y1);
+		//float j = (z2-z1) * (x3-x1) - (x2-x1) * (z3-z1);
+		//float k = (x2-x1) * (y3-y1) - (y2-y1) * (x3-x1);
+		//float d = -(i * x1 + j * y1 + k * z1);
 
 		for (int i=0;i<cloud->points.size();i++) {
 			//count on a set to check if the element is in the set, not zero means it contains
@@ -188,9 +191,9 @@ int main ()
 	
 
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
-	std::unordered_set<int> inliers = Ransac(cloud, 50, 0.5);
+	std::unordered_set<int> inliers = Ransac(cloud, 100, 0.2);
 
-	pcl::PointCloud<pcl::PointXYZ>::Ptr  cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
 
 	for(int index = 0; index < cloud->points.size(); index++)
