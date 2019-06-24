@@ -63,9 +63,18 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     ProcessPointClouds<pcl::PointXYZ>  processor_PC;
     std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> my_seg_cloud = processor_PC.SegmentPlane(clouds, 100, 0.2);
     //Color(R,G,B)
-    renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
-    renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
+    //renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
+    //renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
 
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = processor_PC.Clustering(my_seg_cloud.first, 1.0, 3, 30);
+    int clusterId = 0;
+    std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1)};
+    for(pcl::PointCloud<pcl::PointXYZ>::Ptr cluster : cloudClusters) {
+        std::cout << "cluster size ";
+        processor_PC.numPoints(cluster);
+        renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId),colors[clusterId]);
+        ++clusterId;
+    }
 }
 
 //Another way to Create point processor on the heap(main memory)
