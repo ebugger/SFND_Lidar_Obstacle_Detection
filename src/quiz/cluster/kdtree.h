@@ -25,19 +25,19 @@ struct KdTree
 	: root(NULL)
 	{}
 
-	void insert_helper(Node** node, int depth, std::vector<float> point, int id) {
+	void insert_helper(Node** node, uint depth, std::vector<float> point, int id) {
 		if(*node == NULL) {
 			*node = new Node(point, id);
-		}
-
-		uint cd = depth % 2;
-
-		if(point[cd] < ((*node)->point[cd])) {
-			//depth++;
-			insert_helper(&((*node)->left), depth + 1, point, id);
 		}else {
-			//depth++;
-			insert_helper(&((*node)->right), depth + 1, point, id);
+			uint cd = depth % 2;
+
+			if(point[cd] < ((*node)->point[cd])) {
+				//depth++;
+				insert_helper(&((*node)->left), depth + 1, point, id);
+			}else {
+				//depth++;
+				insert_helper(&((*node)->right), depth + 1, point, id);
+			}
 		}
 	}
 
