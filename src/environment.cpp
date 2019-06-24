@@ -57,7 +57,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     pcl::PointCloud<pcl::PointXYZ>::Ptr clouds = lidarSensor->scan();
     //render points and shapes to the pcl viewer.render your lidar rays as line segments in the viewer.
     //renderRays(viewer, lidarSensor->position, clouds);
-    renderPointCloud(viewer, clouds, "test", Color(1,1,1));
+    //renderPointCloud(viewer, clouds, "test", Color(1,1,1));
 
     // TODO:: Create point processor on the stack
     ProcessPointClouds<pcl::PointXYZ>  processor_PC;
@@ -68,7 +68,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 
     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = processor_PC.Clustering(my_seg_cloud.first, 1.0, 3, 30);
     int clusterId = 0;
-    std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1)};
+    //yellow for (1,1,0)
+    std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
     for(pcl::PointCloud<pcl::PointXYZ>::Ptr cluster : cloudClusters) {
         std::cout << "cluster size ";
         processor_PC.numPoints(cluster);
