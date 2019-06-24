@@ -19,6 +19,7 @@ struct Node
 
 struct KdTree
 {
+	//node pointer was actually what root was to begin with
 	Node* root;
 
 	KdTree()
@@ -27,6 +28,7 @@ struct KdTree
 
 	void insert_helper(Node** node, uint depth, std::vector<float> point, int id) {
 		if(*node == NULL) {
+			//hey, root ptr! here is the new addr you should to point to. Ressign node in the tree
 			*node = new Node(point, id);
 		}else {
 			uint cd = depth % 2;
@@ -45,6 +47,7 @@ struct KdTree
 	{
 		// TODO: Fill in this function to insert a new point into the tree
 		// the function should create a new node and place correctly with in the root 
+		//really want to abale to assign this node in the tree, so for pass root address and depth 0 for starting resursive
 		insert_helper(&root, 0, point, id);
 
 	}
