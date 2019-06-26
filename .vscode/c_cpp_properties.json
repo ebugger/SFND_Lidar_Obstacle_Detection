@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include/",
+                "/usr/include/eigen3/",
+                "/usr/include/vtk-6.2/"
+            ],
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
