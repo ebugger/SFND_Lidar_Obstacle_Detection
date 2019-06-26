@@ -76,5 +76,7 @@ EuclideanCluster():
 ![not text](img/boxexample2.png)
   
  In the above image, the bounding box on the right is more efficient, containing all the points with the minimum area required. It would be nice to take into account box rotation in the XY plane, about the Z axis. Rotation about the X or Y axes would yield weird results, since the car in the majority of situations is not concerned with the Z dimension, or has any control over Z movement.
+ 
  The file containing the box struct is located in src/render/box.h and contains an additional struct called BoxQ. This struct has a quaternion member that allows rotations. Also there is an additional renderBox function in render.cpp that takes a BoxQ argument and renders the rotational box. There is a blog post about fitting the smallest possible 3D box around a 3D point cloud here. The solution in the post uses PCA, principal component analysis and includes Z axis rotations as well. A challenge problem is then to find the smallest fitting box but which is oriented flat with the XY plane
- http://codextechnicanum.blogspot.com/2015/04/find-minimum-oriented-bounding-box-of.html
+
+http://codextechnicanum.blogspot.com/2015/04/find-minimum-oriented-bounding-box-of.html
