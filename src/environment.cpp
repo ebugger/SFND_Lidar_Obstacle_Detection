@@ -51,7 +51,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     //point cloud data which could be very large. By instatinating on the heap, we have more memory to work with
     // than the 2MB on the stack. However, it takes longer to look up objects on the heap, while stack lookup 
     // is very fast.
-    Lidar * lidarSensor = new Lidar(cars, .0);
+    Lidar* lidarSensor = new Lidar(cars, .0);
     //The Ptr type from PointCloud indicates that the object is actually a pointer - a 32 bit integer that 
     //contains the memory address of your point cloud object
     pcl::PointCloud<pcl::PointXYZ>::Ptr clouds = lidarSensor->scan();
@@ -81,6 +81,16 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     }
 }
 
+
+void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
+    bool renderScene = false;
+    std::vector<Car> cars = initHighway(renderScene, viewer);
+
+    ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI> ();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
+    renderPointCloud(viewer, inputcloud, "inputcloud" );
+
+}
 //Another way to Create point processor on the heap(main memory)
 //ProcessPointClouds<pcl::PointXYZ>*  porce_PC = new ProcessPointClouds<pcl::PointXYZ>();
 
@@ -120,8 +130,8 @@ int main (int argc, char** argv)
     //XY, TopDown, Side, and FPS. XY gives a 45 degree angle view, while FPS is First Person Sense and gives 
     //the sensation of being in the car’s driver seat.
     initCamera(setAngle, viewer);
-    simpleHighway(viewer);
-
+    //impleHighway(viewer);
+    cityBlock(viewer);
     while (!viewer->wasStopped ())
     {
         viewer->spinOnce ();
