@@ -85,10 +85,12 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     bool renderScene = false;
     std::vector<Car> cars = initHighway(renderScene, viewer);
-
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud (new pcl::PointCloud<pcl::PointXYZI> ());
     ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI> ();
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
-    renderPointCloud(viewer, inputcloud, "inputcloud" );
+    //renderPointCloud(viewer, inputcloud, "inputcloud" );
+    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.01f, Eigen::Vector4f (-1, -1, -1, 1), Eigen::Vector4f (1, 1, 1, 1));
+    renderPointCloud(viewer, filter_cloud, "filterCould");
 
 }
 //Another way to Create point processor on the heap(main memory)
