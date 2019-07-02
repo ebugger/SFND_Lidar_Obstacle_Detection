@@ -114,6 +114,38 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     }
 
 }
+
+void newcityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointClouds<pcl::PointXYZI>* pointProcessorI, const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputcloud) {
+    bool renderScene = false;
+    std::vector<Car> cars = initHighway(renderScene, viewer);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud (new pcl::PointCloud<pcl::PointXYZI> ());
+
+    //renderPointCloud(viewer, inputcloud, "inputcloud" );
+    //from topdown view, up for positive x, left for positive y, and the origin for z is on the top of the car.
+    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.15f, Eigen::Vector4f (-10, -4, -2, 1), Eigen::Vector4f (32, 7, 1, 1));
+    //renderPointCloud(viewer, filter_cloud, "filterCould");
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> my_seg_cloud = pointProcessorI->SegmentPlane(filter_cloud, 100, 0.2);
+    //Color(R,G,B)
+    //renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
+    renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
+    //Max is so important as big objects always contains much more points.
+    Box roof_box = {-2.6, -1.7, -1, 2.6, 1.7, -.4};
+    renderBox(viewer, roof_box, 33265, Color(128,0,128));
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 80, 1000);
+    int clusterId = 0;
+    //yellow for (1,1,0)
+    std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
+    for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters) {
+        std::cout << "cluster size ";
+        pointProcessorI->numPoints(cluster);
+        renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId),colors[clusterId%3]);
+        //using bbox
+        Box box = pointProcessorI->BoundingBox(cluster);
+        renderBox(viewer, box, clusterId);
+        ++clusterId;
+    }
+
+}
 //Another way to Create point processor on the heap(main memory)
 //ProcessPointClouds<pcl::PointXYZ>*  porce_PC = new ProcessPointClouds<pcl::PointXYZ>();
 
@@ -155,9 +187,22 @@ int main (int argc, char** argv)
     //the sensation of being in the car’s driver seat.
     initCamera(setAngle, viewer);
     //impleHighway(viewer);
-    cityBlock(viewer);
+    //cityBlock(viewer);
+    ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI> ();
+    std::vector<boost::filesystem::path> stream = pointProcessorI->streamPcd("../src/sensors/data/pcd/data_1");
+    auto streamIterator = stream.begin();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloudI;
     while (!viewer->wasStopped ())
     {
+        viewer->removeAllPointClouds();
+        viewer->removeAllShapes();
+        inputcloudI = pointProcessorI->loadPcd((*streamIterator).string());
+        newcityBlock(viewer, pointProcessorI, inputcloudI);
+
+        streamIterator++;
+        if(streamIterator == stream.end())
+            streamIterator = stream.begin();
+
         viewer->spinOnce ();
     } 
 }
