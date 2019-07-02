@@ -90,14 +90,14 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
     //renderPointCloud(viewer, inputcloud, "inputcloud" );
     //from topdown view, up for positive x, left for positive y, and the origin for z is on the top of the car.
-    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.25f, Eigen::Vector4f (-6, -4, -2, 1), Eigen::Vector4f (32, 7, 1, 1));
+    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.15f, Eigen::Vector4f (-10, -4, -2, 1), Eigen::Vector4f (32, 7, 1, 1));
     //renderPointCloud(viewer, filter_cloud, "filterCould");
     std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> my_seg_cloud = pointProcessorI->SegmentPlane(filter_cloud, 100, 0.2);
     //Color(R,G,B)
     //renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
     renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
     //Max is so important as big objects always contains much more points.
-    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 100, 900);
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 80, 1000);
     int clusterId = 0;
     //yellow for (1,1,0)
     std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
