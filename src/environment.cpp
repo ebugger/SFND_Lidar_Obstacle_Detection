@@ -97,6 +97,8 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     //renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
     renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
     //Max is so important as big objects always contains much more points.
+    Box roof_box = {-2.6, -1.7, -1, 2.6, 1.7, -.4};
+    renderBox(viewer, roof_box, 33265, Color(128,0,128));
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 80, 1000);
     int clusterId = 0;
     //yellow for (1,1,0)
