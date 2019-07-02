@@ -90,7 +90,7 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
     //renderPointCloud(viewer, inputcloud, "inputcloud" );
     //from topdown view, up for positive x, left for positive y, and the origin for z is on the top of the car.
-    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.01f, Eigen::Vector4f (-6, -4, -2, 1), Eigen::Vector4f (13, 7, 1, 1));
+    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.25f, Eigen::Vector4f (-6, -4, -2, 1), Eigen::Vector4f (13, 7, 1, 1));
     renderPointCloud(viewer, filter_cloud, "filterCould");
 
 }
