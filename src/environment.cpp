@@ -89,7 +89,8 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI> ();
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
     //renderPointCloud(viewer, inputcloud, "inputcloud" );
-    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.01f, Eigen::Vector4f (-1, -1, -1, 1), Eigen::Vector4f (1, 1, 1, 1));
+    //from topdown view, up for positive x, left for positive y, and the origin for z is on the top of the car.
+    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.01f, Eigen::Vector4f (-6, -4, -2, 1), Eigen::Vector4f (13, 7, 1, 1));
     renderPointCloud(viewer, filter_cloud, "filterCould");
 
 }
@@ -127,7 +128,8 @@ int main (int argc, char** argv)
     //viewer is usually passed in as a reference. That way the process is more streamlined because 
     //something doesn't need to get returned.
     pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-    CameraAngle setAngle = XY;
+    //CameraAngle setAngle = XY;
+    CameraAngle setAngle = TopDown;
     //set up different viewing angles in your window, 
     //XY, TopDown, Side, and FPS. XY gives a 45 degree angle view, while FPS is First Person Sense and gives 
     //the sensation of being in the car’s driver seat.
