@@ -7,10 +7,31 @@
 #include <string>
 #include "kdtree.h"
 #include <unordered_set>
-
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/crop_box.h>
+#include <pcl/common/common.h>
 // Arguments:
 // window is the region to draw box around
 // increase zoom to see more of the area
+Box BoundingBox(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster)
+{
+
+    // Find bounding box for one of the clusters
+    pcl::PointXYZI minPoint;
+	pcl::PointXYZI maxPoint;
+    pcl::getMinMax3D(*cluster, minPoint, maxPoint);
+	
+
+    Box box;
+    box.x_min = minPoint.x;
+    box.y_min = minPoint.y;
+    box.z_min = minPoint.z;
+    box.x_max = maxPoint.x;
+    box.y_max = maxPoint.y;
+    box.z_max = maxPoint.z;
+
+    return box;
+}
 pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom)
 {
 	pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer ("3D Viewer"));
@@ -95,7 +116,7 @@ void Proximity(const std::vector<std::vector<float>>& points, std::vector<int>& 
 
 }
 
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> euclideanCluster(const pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, KdTree* tree, float distanceTol, int minSize, int maxSize)
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> euclideanCluster(const pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, KdTree* tree, float distanceTol)
 {
 	std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters_;
 	// TODO: Fill out this function to return list of indices for each cluster
@@ -152,7 +173,7 @@ int main ()
 	std::vector<std::vector<float>> points = { {-6.2,7,8}, {-6.3,8.4,-8}, {-5.2,7.1,-0.6}, {-5.7,6.3, 0.4}, {7.2,6.1,1}, {8.0,5.3,-1}, {7.2,7.1,0.8}, {0.2,-7.1,-0.6}, {1.7,-6.9,0.4}, {-1.2,-7.2,-6.2}, {2.2,-8.9,8.7} };
 	//std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4}, {-5.2,7.1}, {-5.7,6.3} };
 	std::vector< std::vector<float> > points_;
-	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud = CreateData(points);
+//	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud = CreateData(points);
 	//renderPointCloud(viewer,cloud,"data");
 
 	KdTree* tree = new KdTree;
@@ -172,7 +193,8 @@ int main ()
 		iter_swap(points.begin()+points.size()/2,points.end()-1);
 		points.pop_back();		
 	}
-
+	
+	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud = CreateData(points_);
   	//int it = 0;
   	//render2DTree(tree->root,viewer,window, it);
   
@@ -185,9 +207,7 @@ int main ()
   	// Time segmentation process
   	auto startTime = std::chrono::steady_clock::now();
   	//from the reordered points
-	cout<<"start euclideanCluster..."<<endl;
-  	std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = euclideanCluster(cloud, tree, 2.0, 2, 100);
-  	cout<<"end euclideanCluster..."<<endl;
+  	std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = euclideanCluster(cloud, tree, 2.0);
   	auto endTime = std::chrono::steady_clock::now();
   	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
   	std::cout << "clustering found " << clusters.size() << " and took " << elapsedTime.count() << " milliseconds" << std::endl;
@@ -196,11 +216,11 @@ int main ()
     std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
     for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : clusters) {
         std::cout << "cluster size ";
-        std::cout << cloud->points.size() << std::endl;
+        std::cout << cluster->points.size() << std::endl;
         renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId),colors[clusterId%3]);
         //using bbox
-        //Box box = pointProcessorI->BoundingBox(cluster);
-        //renderBox(viewer, box, clusterId);
+        Box box = BoundingBox(cluster);
+        renderBox(viewer, box, clusterId);
         ++clusterId;
     }
 	/* 
