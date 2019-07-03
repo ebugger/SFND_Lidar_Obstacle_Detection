@@ -23,17 +23,17 @@ pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom)
   	return viewer;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData(std::vector<std::vector<float>> points)
+pcl::PointCloud<pcl::PointXYZI>::Ptr CreateData(std::vector<std::vector<float>> points)
 {
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
   	
   	for(int i = 0; i < points.size(); i++)
   	{
-  		pcl::PointXYZ point;
+  		pcl::PointXYZI point;
   		point.x = points[i][0];
   		point.y = points[i][1];
   		point.z = points[i][2];
-
+		point.intensity = .0f;
   		cloud->points.push_back(point);
 
   	}
@@ -95,23 +95,43 @@ void Proximity(const std::vector<std::vector<float>>& points, std::vector<int>& 
 
 }
 
-std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> euclideanCluster(const pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, KdTree* tree, float distanceTol, int minSize, int maxSize)
 {
-
+	std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters_;
 	// TODO: Fill out this function to return list of indices for each cluster
 	std::vector<std::vector<int>> clusters;
+	std::vector<std::vector<float>> points;
 	//or use std::vector<bool> process_list(points.size(), false) and check if(process_list[i]) in future;
 	std::unordered_set<int> process_list {};
+	std::vector<pcl::PointIndices> cluster_indices;
 
-
+	std::vector<float> temp;
+	for (int i=0;i<cloud->points.size();i++ ){
+	        std::vector<float> temp;	
+		temp.push_back(cloud->points[i].x);
+		temp.push_back(cloud->points[i].y);
+		temp.push_back(cloud->points[i].z);
+		points.push_back(temp);
+	}
 	for (int i=0;i<points.size();i++) {
 		if(process_list.count(i) == 0) {
-			std::vector<int> cluster {};
-			Proximity(points, cluster, i, process_list, tree, distanceTol);
-			clusters.push_back(cluster);
+			pcl::PointIndices cluster;
+			Proximity(points, cluster.indices, i, process_list, tree, distanceTol);
+			//if((cluster.indices.size() >= minSize) && (cluster.indices.size() <= maxSize));
+			cluster_indices.push_back(cluster);
 		}
 	}
-	return clusters;
+    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it) {
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZI>);
+        for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit) {
+            cloud_cluster->points.push_back (cloud->points[*pit]);
+        }
+        cloud_cluster->width = cloud_cluster->points.size ();
+        cloud_cluster->height = 1;
+        cloud_cluster->is_dense = true;
+        clusters_.push_back(cloud_cluster);
+    }	
+	return clusters_;
 
 }
 
@@ -132,8 +152,8 @@ int main ()
 	std::vector<std::vector<float>> points = { {-6.2,7,8}, {-6.3,8.4,-8}, {-5.2,7.1,-0.6}, {-5.7,6.3, 0.4}, {7.2,6.1,1}, {8.0,5.3,-1}, {7.2,7.1,0.8}, {0.2,-7.1,-0.6}, {1.7,-6.9,0.4}, {-1.2,-7.2,-6.2}, {2.2,-8.9,8.7} };
 	//std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4}, {-5.2,7.1}, {-5.7,6.3} };
 	std::vector< std::vector<float> > points_;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData(points);
-	renderPointCloud(viewer,cloud,"data");
+	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud = CreateData(points);
+	//renderPointCloud(viewer,cloud,"data");
 
 	KdTree* tree = new KdTree;
 	
@@ -165,12 +185,25 @@ int main ()
   	// Time segmentation process
   	auto startTime = std::chrono::steady_clock::now();
   	//from the reordered points
-  	std::vector<std::vector<int>> clusters = euclideanCluster(points_, tree, 2.0);
-  	//
+	cout<<"start euclideanCluster..."<<endl;
+  	std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = euclideanCluster(cloud, tree, 2.0, 2, 100);
+  	cout<<"end euclideanCluster..."<<endl;
   	auto endTime = std::chrono::steady_clock::now();
   	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
   	std::cout << "clustering found " << clusters.size() << " and took " << elapsedTime.count() << " milliseconds" << std::endl;
-
+    int clusterId = 0;
+    //yellow for (1,1,0)
+    std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
+    for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : clusters) {
+        std::cout << "cluster size ";
+        std::cout << cloud->points.size() << std::endl;
+        renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId),colors[clusterId%3]);
+        //using bbox
+        //Box box = pointProcessorI->BoundingBox(cluster);
+        //renderBox(viewer, box, clusterId);
+        ++clusterId;
+    }
+	/* 
   	// Render clusters
   	int clusterId = 0;
 	std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1)};
@@ -182,6 +215,7 @@ int main ()
   		renderPointCloud(viewer, clusterCloud,"cluster"+std::to_string(clusterId),colors[clusterId%3]);
   		++clusterId;
   	}
+	  */
   	if(clusters.size()==0)
   		renderPointCloud(viewer,cloud,"data");
   	while (!viewer->wasStopped ())
@@ -189,4 +223,5 @@ int main ()
   	  viewer->spinOnce ();
   	}
 }
+
 
