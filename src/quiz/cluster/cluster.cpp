@@ -131,15 +131,29 @@ int main ()
 	// Create data
 	std::vector<std::vector<float>> points = { {-6.2,7,8}, {-6.3,8.4,-8}, {-5.2,7.1,-0.6}, {-5.7,6.3, 0.4}, {7.2,6.1,1}, {8.0,5.3,-1}, {7.2,7.1,0.8}, {0.2,-7.1,-0.6}, {1.7,-6.9,0.4}, {-1.2,-7.2,-6.2}, {2.2,-8.9,8.7} };
 	//std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4}, {-5.2,7.1}, {-5.7,6.3} };
+	std::vector< std::vector<float> > points_;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData(points);
 	renderPointCloud(viewer,cloud,"data");
 
 	KdTree* tree = new KdTree;
-  
-    for (int i=0; i<points.size(); i++) 
-    	tree->insert(points[i],i); 
+	
+	//optimaized for binary tree(extract the median element in the dimention)
+	int p_size = points.size();
+    for (int i=0; i<p_size; i++) {
+		int idx = i % 3;
+		//get the median element on rolling x->y->z
+        std::nth_element(points.begin(), points.begin() + points.size()/2, points.end(),
+            [idx](std::vector<float> const &lhs,
+             std::vector<float> const &rhs) { return lhs[idx] < rhs[idx]; });
+		tree->insert(points[points.size()/2],i);
+		//reorder the the points by the insert order
+		points_.push_back(points[points.size()/2]);
+		//remove the median(swap to end and popback)
+		iter_swap(points.begin()+points.size()/2,points.end()-1);
+		points.pop_back();		
+	}
 
-  	int it = 0;
+  	//int it = 0;
   	//render2DTree(tree->root,viewer,window, it);
   
   	std::cout << "Test Search" << std::endl;
@@ -150,8 +164,8 @@ int main ()
 	}
   	// Time segmentation process
   	auto startTime = std::chrono::steady_clock::now();
-  	//
-  	std::vector<std::vector<int>> clusters = euclideanCluster(points, tree, 4.0);
+  	//from the reordered points
+  	std::vector<std::vector<int>> clusters = euclideanCluster(points_, tree, 2.0);
   	//
   	auto endTime = std::chrono::steady_clock::now();
   	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
@@ -164,7 +178,7 @@ int main ()
   	{
   		pcl::PointCloud<pcl::PointXYZ>::Ptr clusterCloud(new pcl::PointCloud<pcl::PointXYZ>());
   		for(int indice: cluster)
-  			clusterCloud->points.push_back(pcl::PointXYZ(points[indice][0],points[indice][1],points[indice][2]));
+  			clusterCloud->points.push_back(pcl::PointXYZ(points_[indice][0],points_[indice][1],points_[indice][2]));
   		renderPointCloud(viewer, clusterCloud,"cluster"+std::to_string(clusterId),colors[clusterId%3]);
   		++clusterId;
   	}
