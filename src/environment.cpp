@@ -230,7 +230,7 @@ void newcityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCl
     renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
     //Max is so important as big objects always contains much more points.
     Box roof_box = {-2.6, -1.7, -1, 2.6, 1.7, -.4};
-    renderBox(viewer, roof_box, 33265, Color(128,0,128));
+    //renderBox(viewer, roof_box, 33265, Color(128,0,128));
     //std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 80, 1000);
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = euclideanCluster(my_seg_cloud.first, 0.4, 80, 1000);
     int clusterId = 0;
@@ -269,7 +269,7 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
         case XY : viewer->setCameraPosition(-distance, -distance, distance, 1, 1, 0); break;
         case TopDown : viewer->setCameraPosition(0, 0, distance, 1, 0, 1); break;
         case Side : viewer->setCameraPosition(0, -distance, 0, 0, 0, 1); break;
-        case FPS : viewer->setCameraPosition(-10, 0, 0, 0, 0, 1);
+        case FPS : viewer->setCameraPosition(-6, 0, -0.6, -0.2, 0, 1);
     }
 
     if(setAngle!=FPS)
@@ -280,12 +280,13 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
 int main (int argc, char** argv)
 {
     std::cout << "starting enviroment" << std::endl;
+    std::vector<pcl::visualization::Camera> cam; 
     //The viewer is used to handle all your visualization of objects on the screen
     //viewer is usually passed in as a reference. That way the process is more streamlined because 
     //something doesn't need to get returned.
     pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     //CameraAngle setAngle = XY;
-    CameraAngle setAngle = TopDown;
+    CameraAngle setAngle = FPS;
     //set up different viewing angles in your window, 
     //XY, TopDown, Side, and FPS. XY gives a 45 degree angle view, while FPS is First Person Sense and gives 
     //the sensation of being in the car’s driver seat.
@@ -302,6 +303,10 @@ int main (int argc, char** argv)
         viewer->removeAllShapes();
         inputcloudI = pointProcessorI->loadPcd((*streamIterator).string());
         newcityBlock(viewer, pointProcessorI, inputcloudI);
+	viewer->getCameras(cam);
+	cout << "Cam: " << endl 
+             << " - pos: (" << cam[0].pos[0] << ", "    << cam[0].pos[1] << ", "    << cam[0].pos[2] << ")" << endl 
+             << " - view: ("    << cam[0].view[0] << ", "   << cam[0].view[1] << ", "   << cam[0].view[2] << ")"    << endl; 
 
         streamIterator++;
         if(streamIterator == stream.end())
