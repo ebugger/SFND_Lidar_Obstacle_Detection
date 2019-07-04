@@ -13,6 +13,7 @@
 #include <string>
 #include "./quiz/cluster/kdtree.h"
 #include <unordered_set>
+
 Box BoundingBox(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster)
 {
 
@@ -91,8 +92,6 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> euclideanCluster( pcl::PointCl
 			//std::vector<int> cluster {};
 			Proximity(points_, cluster.indices, i, process_list, tree, distanceTol);
 			if((cluster.indices.size() >= minSize) && (cluster.indices.size() <= maxSize))
-			//	cluster_indices.push_back(cluster);
-			//      cout<<"Proximity done for size:  "<< cluster.indices.size()<<endl;
 				cluster_indices.push_back(cluster);
 		}
 	}
@@ -135,7 +134,6 @@ std::vector<Car> initHighway(bool renderScene, pcl::visualization::PCLVisualizer
     return cars;
 }
 
-
 void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
     // ----------------------------------------------------
@@ -167,6 +165,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
     renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
 
+    //std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = processor_PC.Clustering(my_seg_cloud.first, 1.0, 3, 30);
     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = processor_PC.Clustering(my_seg_cloud.first, 1.0, 3, 30);
     int clusterId = 0;
     //yellow for (1,1,0)
@@ -200,6 +199,38 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     //Max is so important as big objects always contains much more points.
     Box roof_box = {-2.6, -1.7, -1, 2.6, 1.7, -.4};
     renderBox(viewer, roof_box, 33265, Color(128,0,128));
+    int clusterId = 0;
+    //yellow for (1,1,0)
+    std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 80, 1000);
+    for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters) {
+        std::cout << "cluster size ";
+        pointProcessorI->numPoints(cluster);
+        renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId),colors[clusterId%3]);
+        //using bbox
+        Box box = pointProcessorI->BoundingBox(cluster);
+        renderBox(viewer, box, clusterId);
+        ++clusterId;
+    }
+
+}
+
+void newcityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointClouds<pcl::PointXYZI>* pointProcessorI, const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputcloud) {
+    bool renderScene = false;
+    std::vector<Car> cars = initHighway(renderScene, viewer);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filter_cloud (new pcl::PointCloud<pcl::PointXYZI> ());
+
+    //renderPointCloud(viewer, inputcloud, "inputcloud" );
+    //from topdown view, up for positive x, left for positive y, and the origin for z is on the top of the car.
+    filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.15f, Eigen::Vector4f (-10, -4, -2, 1), Eigen::Vector4f (32, 7, 1, 1));
+    //renderPointCloud(viewer, filter_cloud, "filterCould");
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> my_seg_cloud = pointProcessorI->SegmentPlane(filter_cloud, 100, 0.2);
+    //Color(R,G,B)
+    //renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
+    renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
+    //Max is so important as big objects always contains much more points.
+    Box roof_box = {-2.6, -1.7, -1, 2.6, 1.7, -.4};
+    renderBox(viewer, roof_box, 33265, Color(128,0,128));
     //std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(my_seg_cloud.first, 0.4, 80, 1000);
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = euclideanCluster(my_seg_cloud.first, 0.4, 80, 1000);
     int clusterId = 0;
@@ -207,9 +238,12 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer) {
     std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
     for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters) {
         std::cout << "cluster size ";
-        pointProcessorI->numPoints(cluster);
+        std::cout << cluster->points.size() << std::endl;
+        //pointProcessorI->numPoints(cluster);
         renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId),colors[clusterId%3]);
         //using bbox
+        Box box = BoundingBox(cluster);
+        renderBox(viewer, box, clusterId);
         //Box box = pointProcessorI->BoundingBox(cluster);
         //renderBox(viewer, box, clusterId);
         ++clusterId;
@@ -257,9 +291,23 @@ int main (int argc, char** argv)
     //the sensation of being in the car’s driver seat.
     initCamera(setAngle, viewer);
     //impleHighway(viewer);
-    cityBlock(viewer);
+    //cityBlock(viewer);
+    ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI> ();
+    std::vector<boost::filesystem::path> stream = pointProcessorI->streamPcd("../src/sensors/data/pcd/data_1");
+    auto streamIterator = stream.begin();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr inputcloudI;
     while (!viewer->wasStopped ())
     {
+        viewer->removeAllPointClouds();
+        viewer->removeAllShapes();
+        inputcloudI = pointProcessorI->loadPcd((*streamIterator).string());
+        newcityBlock(viewer, pointProcessorI, inputcloudI);
+
+        streamIterator++;
+        if(streamIterator == stream.end())
+            streamIterator = stream.begin();
+
         viewer->spinOnce ();
     } 
 }
+
