@@ -61,56 +61,6 @@ pcl::visualization::PCLVisualizer::Ptr initScene()
   	return viewer;
 }
 
-/* 
-std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
-{
-	std::unordered_set<int> inliersResult;
-	srand(time(NULL));
-	while(maxIterations--){
-		//hash set with no order, with unique element
-		std::unordered_set<int> inliers;
-		while(inliers.size() < 2) {
-			//rand() will generate very large number and we got a MOD operator, so the result will be in 0 and the points size.
-			inliers.insert(rand() % (cloud->points.size()));
-		}
-
-		float x1, x2, y1, y2;
-
-		auto itr = inliers.begin();
-		x1 = cloud->points[*itr].x;
-		y1 = cloud->points[*itr].y;
-		itr++;
-		x2 = cloud->points[*itr].x;
-		y2 = cloud->points[*itr].y;	
-
-		float A = (y1 - y2);
-		float B = (x2 - x1);
-		float C = (x1 * y2 - x2 * y1);
-
-		for (int i=0;i<cloud->points.size();i++) {
-			//count on a set to check if the element is in the set, not zero means it contains
-			if(inliers.count(i) > 0)
-				//do nothing
-				continue;
-			
-			pcl::PointXYZ point = cloud->points[i];
-			float x0 = point.x;
-			float y0 = point.y;
-			//fabs and sqrt
-			float dist = fabs(A * x0 + B * y0 + C ) / sqrt(A*A + B*B);
-
-			if(dist <= distanceTol)
-				inliers.insert(i);
-
-		}
-		if(inliers.size() > inliersResult.size())
-			inliersResult = inliers;
-
-	}
-	return inliersResult;
-
-}
-*/
 
 std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
 {
