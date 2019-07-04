@@ -66,10 +66,10 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 {
 	std::unordered_set<int> inliersResult;
 	srand(time(NULL));
-	while(maxIterations--){
+	while (maxIterations--){
 		//hash set with no order, with unique element
 		std::unordered_set<int> inliers;
-		while(inliers.size() < 3) {
+		while (inliers.size() < 3) {
 			//rand() will generate very large number and we got a MOD operator, so the result will be in 0 and the points size.
 			inliers.insert(rand() % (cloud->points.size()));
 		}
@@ -92,7 +92,7 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 		float a = (y2 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
 		float b = (z2 - z1) * (x3 - x1) - (x2 - x1) * (z3 - z1);
 		float c = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
-		float d = -(i * x1 + j * y1 + k * z1);
+		float d = -(a * x1 + b * y1 + c * z1);
 
 
 		for (int i=0;i<cloud->points.size();i++) {
