@@ -62,8 +62,9 @@ pcl::visualization::PCLVisualizer::Ptr initScene()
 }
 
 
-std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
-{
+std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol) {
+	auto startTime = std::chrono::steady_clock::now();
+	int find_loops = 0;
 	std::unordered_set<int> inliersResult;
 	srand(time(NULL));
 	while (maxIterations--){
@@ -106,7 +107,6 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 			float y0 = point.y;
 			float z0 = point.z;
 			//fabs and sqrt
-			//float dist = fabs(A * x0 + B * y0 + C ) / sqrt(A*A + B*B);
 			float dist = fabs(a * x0 + b * y0 + c * z0 + d) / sqrt(a * a + b * b + c * c);
 			if(dist <= distanceTol)
 				inliers.insert(i);
@@ -114,8 +114,12 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 		}
 		if(inliers.size() > inliersResult.size())
 			inliersResult = inliers;
-
+			find_loops = maxIterations;
 	}
+	cout<<"Loop #" <<find_loops<<"Find max plane: "<< inliersResult.size()<<"points"<<endl;
+	auto endTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "Ransac Plane segmentation took " << elapsedTime.count() << " milliseconds" << std::endl;
 	return inliersResult;
 
 }
@@ -133,7 +137,7 @@ int main ()
 	
 
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
-	std::unordered_set<int> inliers = RansacPlane(cloud, 100, 0.2);
+	std::unordered_set<int> inliers = RansacPlane(cloud, 100, 0.25);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
