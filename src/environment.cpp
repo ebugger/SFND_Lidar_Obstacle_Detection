@@ -14,6 +14,83 @@
 #include "./quiz/cluster/kdtree.h"
 #include <unordered_set>
 
+std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> RansacPlane(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, int maxIterations, float distanceTol) {
+	auto startTime = std::chrono::steady_clock::now();
+	int find_loops = 0;
+	std::unordered_set<int> inliersResult;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudInliers(new pcl::PointCloud<pcl::PointXYZI>());
+	pcl::PointCloud<pcl::PointXYZI>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZI>());
+	srand(time(NULL));
+	while (maxIterations--){
+		//hash set with no order, with unique element
+		std::unordered_set<int> inliers;
+		while (inliers.size() < 3) {
+			//rand() will generate very large number and we got a MOD operator, so the result will be in 0 and the points size.
+			inliers.insert(rand() % (cloud->points.size()));
+		}
+
+		float x1, x2, x3, y1, y2, y3, z1, z2, z3;
+
+		auto itr = inliers.begin();
+		x1 = cloud->points[*itr].x;
+		y1 = cloud->points[*itr].y;
+		z1 = cloud->points[*itr].z;
+		itr++;
+		x2 = cloud->points[*itr].x;
+		y2 = cloud->points[*itr].y;	
+		z2 = cloud->points[*itr].z;
+		itr++;
+		x3 = cloud->points[*itr].x;
+		y3 = cloud->points[*itr].y;	
+		z3 = cloud->points[*itr].z;		 
+
+		float a = (y2 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
+		float b = (z2 - z1) * (x3 - x1) - (x2 - x1) * (z3 - z1);
+		float c = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+		float d = -(a * x1 + b * y1 + c * z1);
+
+
+		for (int i=0;i<cloud->points.size();i++) {
+			//count on a set to check if the element is in the set, not zero means it contains
+			if(inliers.count(i) > 0)
+				//do nothing
+				continue;
+			
+			pcl::PointXYZI point = cloud->points[i];
+			float x0 = point.x;
+			float y0 = point.y;
+			float z0 = point.z;
+			//fabs and sqrt
+			float dist = fabs(a * x0 + b * y0 + c * z0 + d) / sqrt(a * a + b * b + c * c);
+			if(dist <= distanceTol)
+				inliers.insert(i);
+
+		}
+		if(inliers.size() > inliersResult.size()) {
+			inliersResult = inliers;
+			find_loops = maxIterations;
+		}
+	}
+	cout<<"Loop #" <<find_loops<<"Find max plane: "<< inliersResult.size()<<"points"<<endl;
+	auto endTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "Ransac Plane segmentation took " << elapsedTime.count() << " milliseconds" << std::endl;
+	//return inliersResult;
+
+	for(int index = 0; index < cloud->points.size(); index++)
+	{
+		pcl::PointXYZI point = cloud->points[index];
+		if(inliersResult.count(index))
+			cloudInliers->points.push_back(point);
+		else
+			cloudOutliers->points.push_back(point);
+	}
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segResult(cloudOutliers, cloudInliers);
+
+    return segResult;
+
+}
+
 Box BoundingBox(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster)
 {
 
@@ -49,6 +126,7 @@ void Proximity(const std::vector<std::vector<float>>& points, std::vector<int>& 
 
 std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> euclideanCluster( pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float distanceTol, int minSize, int maxSize)
 {
+	auto startTime = std::chrono::steady_clock::now();
 	std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters_;
 	// TODO: Fill out this function to return list of indices for each cluster
 	std::vector<std::vector<int>> clusters;
@@ -104,7 +182,10 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> euclideanCluster( pcl::PointCl
         cloud_cluster->height = 1;
         cloud_cluster->is_dense = true;
         clusters_.push_back(cloud_cluster);
-    }	
+    }
+	auto endTime = std::chrono::steady_clock::now();
+    	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    	std::cout << "clustering took " << elapsedTime.count() << " milliseconds and found " << clusters_.size() << " clusters" << std::endl;	
 	return clusters_;
 
 }
@@ -224,7 +305,8 @@ void newcityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCl
     //from topdown view, up for positive x, left for positive y, and the origin for z is on the top of the car.
     filter_cloud = pointProcessorI->FilterCloud(inputcloud, 0.15f, Eigen::Vector4f (-10, -4, -2, 1), Eigen::Vector4f (32, 7, 1, 1));
     //renderPointCloud(viewer, filter_cloud, "filterCould");
-    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> my_seg_cloud = pointProcessorI->SegmentPlane(filter_cloud, 100, 0.2);
+    //std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> my_seg_cloud = pointProcessorI->SegmentPlane(filter_cloud, 100, 0.25);
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> my_seg_cloud = RansacPlane(filter_cloud, 100, 0.25);
     //Color(R,G,B)
     //renderPointCloud(viewer, my_seg_cloud.first, "obstacle_cloud", Color(1,0,0));
     renderPointCloud(viewer, my_seg_cloud.second, "plnae_cloud", Color(0,1,0));
@@ -280,7 +362,7 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
 int main (int argc, char** argv)
 {
     std::cout << "starting enviroment" << std::endl;
-    std::vector<pcl::visualization::Camera> cam; 
+    //std::vector<pcl::visualization::Camera> cam; 
     //The viewer is used to handle all your visualization of objects on the screen
     //viewer is usually passed in as a reference. That way the process is more streamlined because 
     //something doesn't need to get returned.
@@ -303,10 +385,10 @@ int main (int argc, char** argv)
         viewer->removeAllShapes();
         inputcloudI = pointProcessorI->loadPcd((*streamIterator).string());
         newcityBlock(viewer, pointProcessorI, inputcloudI);
-	viewer->getCameras(cam);
-	cout << "Cam: " << endl 
-             << " - pos: (" << cam[0].pos[0] << ", "    << cam[0].pos[1] << ", "    << cam[0].pos[2] << ")" << endl 
-             << " - view: ("    << cam[0].view[0] << ", "   << cam[0].view[1] << ", "   << cam[0].view[2] << ")"    << endl; 
+	//viewer->getCameras(cam);
+	//cout << "Cam: " << endl 
+        //     << " - pos: (" << cam[0].pos[0] << ", "    << cam[0].pos[1] << ", "    << cam[0].pos[2] << ")" << endl 
+        //     << " - view: ("    << cam[0].view[0] << ", "   << cam[0].view[1] << ", "   << cam[0].view[2] << ")"    << endl; 
 
         streamIterator++;
         if(streamIterator == stream.end())
@@ -315,4 +397,5 @@ int main (int argc, char** argv)
         viewer->spinOnce ();
     } 
 }
+
 
