@@ -112,9 +112,10 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 				inliers.insert(i);
 
 		}
-		if(inliers.size() > inliersResult.size())
+		if(inliers.size() > inliersResult.size()) {
 			inliersResult = inliers;
 			find_loops = maxIterations;
+		}
 	}
 	cout<<"Loop #" <<find_loops<<"Find max plane: "<< inliersResult.size()<<"points"<<endl;
 	auto endTime = std::chrono::steady_clock::now();
