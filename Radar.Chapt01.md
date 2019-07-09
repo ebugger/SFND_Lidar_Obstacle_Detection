@@ -16,7 +16,7 @@ Radar lacks the capability to generate a high resolution image, but it has highl
 ![no text](img/radar03.png)
 
 ## Single Wave Parameters
-![no text](img/radar04.png)
+![no text](img/radar04.PNG)
 
 The frequency of a wave is the number of waves that pass by each second, and is measured in Hertz (Hz). The automotive radar generally operates at W band (76GHz - 81GHz). The signal at this frequency is referred to as millimeterWave since the wavelength is in mm.
 
@@ -32,7 +32,7 @@ P(dBm) = 10 ⋅ log10( P(mW) / 1mW)
 ## FMCW Chirps
 ![no text](img/radar05.png)
 
-![no text](img/radar06.png)
+![no text](img/radar06.PNG)
 
 ## FMCW Hardware Overview
 ![no text](img/radar07.png)
@@ -61,13 +61,13 @@ Antenna radiation not only comprises of the main beam but the sidelobes as well.
 ## Radar Cross Section
 ![no text](img/radar10.png)
 
-![no text](img/radar11.png)
+![no text](img/radar11.PNG)
 
 ## RCS Units
-![no text](img/radar12.png)
+![no text](img/radar12.PNG)
 
 ##Range Equation Overview
-![no text](img/radar13.png)
+![no text](img/radar13.PNG)
 ![no text](img/radar14.png)
 
 The image above shows the variation in the signal strength level as it travels through transmitter, over the air and at the receiver
