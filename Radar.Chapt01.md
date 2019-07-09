@@ -1,5 +1,5 @@
 ## Radar Construction
-![no text](img/radar01.png)
+![no text](img/radar001.PNG)
 The automotive radars are small size sensors that can easily fit beneath the front grill or the bumper. As seen in the image above a radar module comprises of different parts.
 
 - **Radar Dome or Radome**: A radome is a structural, weatherproof enclosure that protects a radar antenna. The radome is constructed of material that minimally attenuates the electromagnetic signal transmitted or received by the antenna, effectively transparent to radio waves.
