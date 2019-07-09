@@ -66,7 +66,7 @@ Antenna radiation not only comprises of the main beam but the sidelobes as well.
 ## RCS Units
 ![no text](img/radar12.PNG)
 
-##Range Equation Overview
+## Range Equation Overview
 ![no text](img/radar13.PNG)
 ![no text](img/radar14.png)
 
