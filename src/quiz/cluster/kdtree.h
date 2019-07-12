@@ -55,7 +55,7 @@ struct KdTree
 	void search_helper(Node* root, uint depth, std::vector<float> target, float distanceTol, std::vector<int>& ids)  {
 		if(root != NULL) {
 			//all 3 if are parallel, maybe independent mybe union mybe none
-			if((fabs( root->point[0] - target[0] ) < distanceTol) &&  (fabs( root->point[1] - target[1] ) < distanceTol) && (fabs( root->point[1] - target[1] ) < distanceTol)) {
+			if((fabs( root->point[0] - target[0] ) < distanceTol) &&  (fabs( root->point[1] - target[1] ) < distanceTol) && (fabs( root->point[2] - target[2] ) < distanceTol)) {
 				float dis = std::sqrt(std::pow( (root->point[0] - target[0]), 2 ) + std::pow( (root->point[1] - target[1]), 2) + std::pow( (root->point[2] - target[2]), 2) );
 				if (dis < distanceTol) {
 					ids.push_back(root->id);
