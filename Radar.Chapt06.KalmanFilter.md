@@ -8,10 +8,13 @@ Understanding the Basis of the Kalman Filter Via a Simple and Intuitive Derivati
 [pdf](media/Understanding the Basis of the Kalman Filter Via a Simple and Intuitive Derivation.pdf)
 
 ## KF illustrated
+[link](https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/?sourceType=weixin&from=singlemessage&wm=5091_90057&isappinstalled=0&featurecode=newtitle)
 ![no text](img/KalmanFilter_illustrated.png)
 
 ## KF defied from MathWorks
+[link](https://www.mathworks.com/help/driving/ug/linear-kalman-filters.html)
 ![no text](img/LinearKalmanFilter.png)
 
 ## trackKF class function from MathWorks
+[link](https://www.mathworks.com/help/driving/ref/trackingkf-class.html)
 ![no text](img/trackingKF.png)
